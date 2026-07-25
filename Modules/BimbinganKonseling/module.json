@@ -1,0 +1,7 @@
+{
+    "name": "BimbinganKonseling",
+    "alias": "bimbingan-konseling",
+    "description": "Modul Bimbingan Konseling UPA PKK",
+    "priority": 0,
+    "active": true
+}

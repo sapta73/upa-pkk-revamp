@@ -1,0 +1,7 @@
+{
+    "name": "Berita",
+    "alias": "berita",
+    "description": "Modul Berita UPA PKK",
+    "priority": 0,
+    "active": true
+}
