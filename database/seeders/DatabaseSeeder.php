@@ -21,5 +21,12 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        User::create([
+            'name' => 'Admin UPA PKK',
+            'email' => 'admin@upa-pkk.ubb.ac.id',
+            'password' => bcrypt('admin123'),
+            'role' => 'admin',
+        ]);
     }
 }

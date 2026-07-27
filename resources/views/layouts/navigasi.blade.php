@@ -218,8 +218,8 @@
                    :class="isActive('/ppid') ? 'nav-link-active' : ''">PPID</a>
                 <a href="{{ url('/karir') }}" class="nav-link px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 rounded-lg focus-ring"
                    :class="isActive('/karir') ? 'nav-link-active' : ''">Karir</a>
-                <a href="{{ url('/kewirausahaan') }}" class="nav-link px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 rounded-lg focus-ring"
-                   :class="isActive('/kewirausahaan') ? 'nav-link-active' : ''">Wirausaha</a>
+                <a href="{{ route('wirausaha.landing') }}" class="nav-link px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 rounded-lg focus-ring"
+                   :class="isActive('/wirausaha') ? 'nav-link-active' : ''">Wirausaha</a>
                 <a href="{{ url('/bimbingan-konseling') }}" class="nav-link px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 rounded-lg focus-ring"
                    :class="isActive('/bimbingan-konseling') ? 'nav-link-active' : ''">BK</a>
                 <a href="{{ url('/kontak') }}" class="nav-link px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 rounded-lg focus-ring"
@@ -296,7 +296,7 @@
                 </div>
                 <a href="{{ url('/ppid') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:text-yellow-600 hover:bg-yellow-50/80 rounded-xl transition-all duration-200 focus-ring">PPID</a>
                 <a href="{{ url('/karir') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:text-yellow-600 hover:bg-yellow-50/80 rounded-xl transition-all duration-200 focus-ring">Karir</a>
-                <a href="{{ url('/kewirausahaan') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:text-yellow-600 hover:bg-yellow-50/80 rounded-xl transition-all duration-200 focus-ring">Wirausaha</a>
+                <a href="{{ route('wirausaha.landing') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:text-yellow-600 hover:bg-yellow-50/80 rounded-xl transition-all duration-200 focus-ring">Wirausaha</a>
                 <a href="{{ url('/bimbingan-konseling') }}" class="block px-4 py-2.5 text-sm font-semibold text-yellow-600 hover:bg-yellow-50/80 rounded-xl transition-all duration-200 focus-ring">Bimbingan Konseling</a>
                 <a href="{{ url('/kontak') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:text-yellow-600 hover:bg-yellow-50/80 rounded-xl transition-all duration-200 focus-ring">Kontak</a>
             </div>
