@@ -14,7 +14,7 @@
         </div>
 
         <div class="mt-4">
-            <x-input-label for="password" :value="'Password'" />
+            <x-input-label for="password" :value="'Kata Sandi'" />
             <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -28,7 +28,7 @@
 
         <div class="flex items-center justify-between mt-4">
             @if (Route::has('password.request'))
-                <a class="text-sm text-[#ffb600] hover:text-[#e6a400] underline" href="{{ route('password.request') }}">Lupa password?</a>
+                <a class="text-sm text-[#ffb600] hover:text-[#e6a400] underline" href="{{ route('password.request') }}">Lupa kata sandi?</a>
             @endif
             <button type="submit" class="bg-[#ffb600] text-white px-4 py-2 rounded-md hover:bg-[#e6a400] transition font-medium">
                 Masuk

@@ -48,12 +48,12 @@
                 <x-input-error :messages="$errors->get('nomor_hp')" class="mt-2" />
             </div>
             <div>
-                <x-input-label for="password" :value="'Password'" />
+                <x-input-label for="password" :value="'Kata Sandi'" />
                 <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
             <div>
-                <x-input-label for="password_confirmation" :value="'Konfirmasi Password'" />
+                <x-input-label for="password_confirmation" :value="'Konfirmasi Kata Sandi'" />
                 <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required />
                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
             </div>

@@ -35,11 +35,19 @@ class UsahaPmwP2mwResource extends Resource
 
     protected static ?string $pluralLabel = 'Usaha PMW/P2MW';
 
+    protected static ?string $modelLabel = 'Usaha';
+
     protected static ?string $slug = 'usaha-pmw-p2mw';
 
     protected static ?string $navigationGroup = 'Wirausaha';
 
     protected static ?int $navigationSort = 1;
+
+    // RBAC: hanya admin yang boleh mengelola usaha
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->role === 'admin';
+    }
 
     public static function form(Form $form): Form
     {

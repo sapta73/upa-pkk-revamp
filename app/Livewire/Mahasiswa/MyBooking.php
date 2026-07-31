@@ -1,10 +1,12 @@
 <?php
 namespace App\Livewire\Mahasiswa;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Modules\BimbinganKonseling\Models\Booking;
 use Modules\BimbinganKonseling\Models\Rating;
 
+#[Layout('layouts.livewire')]
 class MyBooking extends Component
 {
     public $tab = 'aktif';

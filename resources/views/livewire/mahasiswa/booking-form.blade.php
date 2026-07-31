@@ -62,7 +62,7 @@
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ url('/mahasiswa/my-booking') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ffb600] text-white font-bold rounded-xl shadow-lg shadow-[#ffb600]/30 hover:shadow-[#ffb600]/50 transition-all duration-300 hover:scale-[1.02]">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        Lihat My Booking
+                        Lihat Booking Saya
                     </a>
                     <a href="{{ url('/bimbingan-konseling') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-300">
                         Kembali ke BK

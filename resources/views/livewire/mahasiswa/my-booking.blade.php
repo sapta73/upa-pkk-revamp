@@ -3,7 +3,7 @@
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">My Booking</h1>
+                <h1 class="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">Booking Saya</h1>
                 <p class="text-gray-500 mt-1">Kelola sesi konselingmu</p>
             </div>
             <a href="{{ url('/bimbingan-konseling') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ffb600] text-white font-bold rounded-xl hover:bg-[#e6a400] transition-all duration-300 shadow-lg shadow-[#ffb600]/30">
@@ -108,7 +108,7 @@
                             @if($b->status == 'disetujui' && $b->link_meeting)
                             <a href="{{ $b->link_meeting }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-500 text-white font-semibold text-sm rounded-xl hover:bg-green-600 transition-all duration-300 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                Join Meeting
+                                Gabung Meeting
                             </a>
                             @endif
                             @if(in_array($b->status, ['menunggu']))

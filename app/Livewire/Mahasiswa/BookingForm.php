@@ -1,11 +1,13 @@
 <?php
 namespace App\Livewire\Mahasiswa;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Modules\BimbinganKonseling\Models\Konselor;
 use Modules\BimbinganKonseling\Models\Jadwal;
 use Modules\BimbinganKonseling\Models\Booking;
 
+#[Layout('layouts.livewire')]
 class BookingForm extends Component
 {
     public $konselorId;
@@ -22,6 +24,7 @@ class BookingForm extends Component
     protected $rules = [
         'selectedJadwal' => 'required',
         'tanggal' => 'required|date|after:today',
+        'jamSesi' => 'nullable',
         'deskripsiMasalah' => 'required|min:10',
     ];
 
@@ -32,6 +35,17 @@ class BookingForm extends Component
             $this->konselor = Konselor::with('jadwals')->findOrFail($id);
             $this->jadwals = $this->konselor->jadwals->where('status_aktif', true);
             $this->step = 2;
+        }
+    }
+
+    /**
+     * Saat jadwal dipilih, isi jam sesi otomatis dari jam mulai jadwal.
+     */
+    public function updatedSelectedJadwal()
+    {
+        if ($this->selectedJadwal) {
+            $jadwal = Jadwal::find($this->selectedJadwal);
+            $this->jamSesi = $jadwal?->jam_mulai ? substr($jadwal->jam_mulai, 0, 5) : null;
         }
     }
 
@@ -49,6 +63,9 @@ class BookingForm extends Component
         $jadwal = Jadwal::findOrFail($this->selectedJadwal);
         $user = auth()->user();
 
+        // Gunakan jam dari jadwal jika jamSesi belum diisi
+        $jamSesi = $this->jamSesi ?: substr($jadwal->jam_mulai, 0, 5);
+
         $booking = Booking::create([
             'kode_booking' => 'BK-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5)),
             'user_id' => $user->id,
@@ -59,7 +76,7 @@ class BookingForm extends Component
             'nomor_hp' => $user->nomor_hp,
             'email' => $user->email,
             'tanggal' => $this->tanggal,
-            'jam_sesi' => $this->jamSesi,
+            'jam_sesi' => $jamSesi,
             'deskripsi_masalah' => $this->deskripsiMasalah,
             'status' => 'menunggu',
         ]);

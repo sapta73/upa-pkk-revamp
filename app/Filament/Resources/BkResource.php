@@ -14,7 +14,15 @@ class BkResource extends Resource
     protected static ?string $model = Konselor::class;
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?string $navigationGroup = 'Bimbingan Konseling';
-    protected static ?string $label = 'Konselor';
+    protected static ?string $navigationLabel = 'Konselor';
+    protected static ?string $modelLabel = 'Konselor';
+    protected static ?string $pluralModelLabel = 'Konselor';
+
+    // RBAC: hanya admin yang boleh mengelola konselor
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->role === 'admin';
+    }
 
     public static function form(Form $form): Form
     {

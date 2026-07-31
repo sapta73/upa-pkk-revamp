@@ -14,8 +14,15 @@ class BookingResource extends Resource
     protected static ?string $model = Booking::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationGroup = 'Bimbingan Konseling';
-    protected static ?string $label = 'Booking';
-    protected static ?string $pluralLabel = 'Booking';
+    protected static ?string $navigationLabel = 'Pemesanan';
+    protected static ?string $modelLabel = 'Pemesanan';
+    protected static ?string $pluralModelLabel = 'Pemesanan';
+
+    // RBAC: hanya admin yang boleh mengelola pemesanan
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->role === 'admin';
+    }
 
     public static function form(Form $form): Form
     {
