@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Filament\Resources\LowonganKerjaResource\Pages;
+
+use App\Filament\Resources\LowonganKerjaResource;
+use Filament\Actions;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateLowonganKerja extends CreateRecord
+{
+    protected static string $resource = LowonganKerjaResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Lowongan kerja berhasil ditambahkan!';
+    }
+}

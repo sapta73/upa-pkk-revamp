@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\BimbinganKonseling\Http\Controllers\KonselingController;
 use App\Http\Controllers\Wirausaha\UsahaController;
+use App\Http\Controllers\Lowongan\LowonganKerjaController;
 
 Route::get('/', function () {
     return view('beranda');
@@ -17,6 +18,12 @@ Route::prefix('wirausaha')->name('wirausaha.')->group(function () {
     Route::get('/', [UsahaController::class, 'landing'])->name('landing');
     Route::get('/daftar-usaha', [UsahaController::class, 'index'])->name('index');
     Route::get('/{id}', [UsahaController::class, 'show'])->name('show');
+});
+
+// Routes Lowongan Kerja
+Route::prefix('lowongan-kerja')->name('lowongan.')->group(function () {
+    Route::get('/', [LowonganKerjaController::class, 'index'])->name('index');
+    Route::get('/{id}', [LowonganKerjaController::class, 'show'])->name('show');
 });
 
 require __DIR__.'/auth.php';
