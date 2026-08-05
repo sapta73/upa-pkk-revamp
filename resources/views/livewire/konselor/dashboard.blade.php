@@ -67,7 +67,7 @@
                         Informasi Kontak
                     </h2>
                     @if($konselor->email)<p class="text-sm text-gray-500 mb-1">Email: {{ $konselor->email }}</p>@endif
-                    @if($konselor->nomor_hp)<p class="text-sm text-gray-500 mb-1">WhatsApp: {{ $konselor->nomor_hp }}</p>@endif
+                    @if($konselor->link_wa)<p class="text-sm text-gray-500 mb-1">WhatsApp: <a href="{{ $konselor->link_wa }}" target="_blank" rel="noopener" class="text-green-600 hover:underline font-medium">{{ $konselor->nomor_hp }}</a></p>@endif
                     @if($konselor->nip)<p class="text-sm text-gray-500">NIP: {{ $konselor->nip }}</p>@endif
                 </div>
             </div>

@@ -29,4 +29,25 @@ class Konselor extends Model
     {
         return $this->ratings()->count();
     }
+
+    /**
+     * Link WhatsApp (wa.me) dari nomor HP konselor.
+     * Nomor lokal 08xx otomatis dikonversi ke format internasional 62xx.
+     */
+    public function getLinkWaAttribute(): ?string
+    {
+        if (blank($this->nomor_hp)) {
+            return null;
+        }
+
+        $nomor = preg_replace('/\D/', '', $this->nomor_hp);
+
+        if (str_starts_with($nomor, '0')) {
+            $nomor = '62' . substr($nomor, 1);
+        } elseif (!str_starts_with($nomor, '62')) {
+            $nomor = '62' . $nomor;
+        }
+
+        return 'https://wa.me/' . $nomor . '?text=' . rawurlencode('Halo, saya ingin konsultasi bimbingan konseling dengan ' . $this->nama . '.');
+    }
 }
