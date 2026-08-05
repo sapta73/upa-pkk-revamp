@@ -9,13 +9,13 @@ import { initScrollAnimations } from './scroll-animations';
 const Alpine = window.Alpine;
 
 if (Alpine) {
-    Alpine.plugin(collapse);
-    Alpine.plugin(intersect);
+  Alpine.plugin(collapse);
+  Alpine.plugin(intersect);
 }
 
 // Inisialisasi animasi scroll setelah DOM siap
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollAnimations);
+  document.addEventListener('DOMContentLoaded', initScrollAnimations);
 } else {
-    initScrollAnimations();
+  initScrollAnimations();
 }
