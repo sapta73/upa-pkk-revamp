@@ -13,7 +13,7 @@ class LowonganKerjaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = LowonganKerja::aktif();
+        $query = LowonganKerja::aktif()->masihBuka();
 
         // Filter berdasarkan tipe pekerjaan
         if ($request->filled('tipe')) {
@@ -53,7 +53,7 @@ class LowonganKerjaController extends Controller
      */
     public function show($id)
     {
-        $lowongan = LowonganKerja::aktif()->findOrFail($id);
+        $lowongan = LowonganKerja::aktif()->masihBuka()->findOrFail($id);
 
         // Lowongan lain yang masih relevan (perusahaan sama atau terbaru)
         $lowonganLainnya = LowonganKerja::aktif()

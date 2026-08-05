@@ -39,7 +39,7 @@
                 @if($lowongan->batas_lamaran && $lowongan->batas_lamaran >= now()->toDateString())
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/20 text-red-300">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Batas {{ $lowongan->batas_lamaran->format('d M Y') }}
+                    Batas {{ $lowongan->batas_lamaran->isoFormat('D MMMM Y') }}
                 </span>
                 @elseif(!$lowongan->batas_lamaran)
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300">
@@ -65,7 +65,7 @@
                 </span>
                 <span class="inline-flex items-center gap-2">
                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Diposting {{ $lowongan->created_at->format('d M Y') }}
+                    Diposting {{ $lowongan->created_at->isoFormat('D MMMM Y') }}
                 </span>
             </div>
         </div>
@@ -151,7 +151,7 @@
                                 <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 Batas Lamaran
                             </dt>
-                            <dd class="text-gray-900 font-medium">{{ $lowongan->batas_lamaran->format('d M Y') }}</dd>
+                            <dd class="text-gray-900 font-medium">{{ $lowongan->batas_lamaran->isoFormat('D MMMM Y') }}</dd>
                         </div>
                         @endif
                         @if($lowongan->kontak)
@@ -205,7 +205,7 @@
                                 {{ $lain->label_tipe }}
                             </span>
                             @if($lain->batas_lamaran)
-                            <span class="inline-flex px-2.5 py-0.5 rounded-lg text-xs text-gray-500 bg-gray-100">Batas {{ $lain->batas_lamaran->format('d M') }}</span>
+                            <span class="inline-flex px-2.5 py-0.5 rounded-lg text-xs text-gray-500 bg-gray-100">Batas {{ $lain->batas_lamaran->isoFormat('D MMMM') }}</span>
                             @endif
                         </div>
                     </div>

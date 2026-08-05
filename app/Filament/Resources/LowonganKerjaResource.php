@@ -45,10 +45,7 @@ class LowonganKerjaResource extends Resource
     // RBAC: hanya admin yang boleh mengelola lowongan
     public static function canViewAny(): bool
     {
-        /** @var \App\Models\User|null $user */
-        $user = app('auth')->guard()->user();
-
-        return $user?->role === 'admin';
+        return auth()->user()?->role === 'admin';
     }
 
     public static function form(Form $form): Form

@@ -120,7 +120,7 @@
                 <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex items-center justify-between">
                     <span class="text-xs text-gray-500">
                         @if($lowongan->batas_lamaran)
-                            Batas: <span class="font-semibold text-gray-700">{{ $lowongan->batas_lamaran->format('d M Y') }}</span>
+                            Batas: <span class="font-semibold text-gray-700">{{ $lowongan->batas_lamaran->isoFormat('D MMMM Y') }}</span>
                         @else
                             <span class="font-semibold text-emerald-600">Selalu dibuka</span>
                         @endif
