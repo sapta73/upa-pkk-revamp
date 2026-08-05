@@ -13,4 +13,20 @@ class Konselor extends Model
     public function bookings() { return $this->hasMany(Booking::class); }
     public function ratings() { return $this->hasMany(Rating::class); }
     public function user() { return $this->belongsTo(User::class); }
+
+    /**
+     * Rata-rata rating dari data rating yang nyata.
+     */
+    public function getRatingRataAttribute(): string
+    {
+        return number_format((float) $this->ratings()->avg('rating'), 1);
+    }
+
+    /**
+     * Jumlah rating yang nyata.
+     */
+    public function getJumlahRatingAttribute(): int
+    {
+        return $this->ratings()->count();
+    }
 }
