@@ -52,9 +52,21 @@
                         <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full">Menunggu Konfirmasi</span>
                     </div>
                     @if($konselor)
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between mb-3">
                         <span class="text-sm text-gray-500">Konselor</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $konselor->nama }}</span>
+                    </div>
+                    @endif
+                    @if($tanggal)
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm text-gray-500">Tanggal</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d F Y') }}</span>
+                    </div>
+                    @endif
+                    @if($jamSesiTerpilih)
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Jam Sesi</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ $jamSesiTerpilih }} WIB</span>
                     </div>
                     @endif
                 </div>
@@ -117,31 +129,71 @@
                     </div>
 
                     <form wire:submit="booking" class="space-y-5">
+
+                        {{-- STEP A: Tanggal Sesi (WAJIB pilih duluan) --}}
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pilih Jadwal</label>
-                            <select wire:model="selectedJadwal" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
-                                <option value="">— Pilih jadwal —</option>
-                                @foreach($jadwals as $j)
-                                <option value="{{ $j->id }}">{{ ucfirst($j->hari) }}, {{ substr($j->jam_mulai,0,5) }}–{{ substr($j->jam_selesai,0,5) }} WIB (Kuota: {{ $j->kuota }})</option>
-                                @endforeach
+                            <label for="tanggal" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Tanggal Sesi
+                            </label>
+                            <input id="tanggal" type="date" wire:model="tanggal" wire:change="pilihTanggal($event.target.value)" min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                            @error('tanggal') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Feedback hari dari tanggal terpilih --}}
+                        @if($tanggal)
+                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
+                            <svg class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div>
+                                <p class="text-sm text-yellow-800">
+                                    <span class="font-bold">Hari {{ $this->namaHariTanggal() }}</span>
+                                    @if($jadwalTersedia->isNotEmpty())
+                                        — pilih slot waktu yang tersedia di bawah.
+                                    @else
+                                        — <span class="font-semibold">tidak ada jadwal tersedia di hari ini.</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- STEP B: Pilih Jadwal (dependent — baru aktif setelah tanggal dipilih) --}}
+                        <div>
+                            <label for="selectedJadwal" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Pilih Jadwal
+                            </label>
+                            <select id="selectedJadwal" wire:model="selectedJadwal" wire:change="pilihJadwal($event.target.value)" {{ $tanggal ? '' : 'disabled' }}
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                                @if(!$tanggal)
+                                    <option value="">Pilih tanggal terlebih dahulu</option>
+                                @elseif($jadwalTersedia->isEmpty())
+                                    <option value="">Tidak ada jadwal tersedia di hari {{ $this->namaHariTanggal() }}</option>
+                                @else
+                                    <option value="">— Pilih jadwal —</option>
+                                    @foreach($jadwalTersedia as $j)
+                                    <option value="{{ $j->id }}">{{ substr($j->jam_mulai,0,5) }} – {{ substr($j->jam_selesai,0,5) }} WIB (Sisa kuota: {{ $j->sisa_kuota }})</option>
+                                    @endforeach
+                                @endif
                             </select>
                             @error('selectedJadwal') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
+
+                        {{-- STEP C: Deskripsi Masalah --}}
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal Sesi</label>
-                            <input type="date" wire:model="tanggal" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
-                            @error('tanggal') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Jam Sesi</label>
-                            <input type="time" wire:model="jamSesi" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Deskripsi Masalah</label>
-                            <textarea wire:model="deskripsiMasalah" rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition" placeholder="Jelaskan secara singkat masalah atau topik yang ingin dikonsultasikan..."></textarea>
+                            <label for="deskripsiMasalah" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                Deskripsi Masalah
+                            </label>
+                            <textarea id="deskripsiMasalah" wire:model="deskripsiMasalah" rows="4"
+                                      class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                                      placeholder="Jelaskan secara singkat masalah atau topik yang ingin dikonsultasikan..."></textarea>
                             @error('deskripsiMasalah') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-[#ffb600] text-white font-bold rounded-xl shadow-lg shadow-[#ffb600]/30 hover:shadow-[#ffb600]/50 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]">
+
+                        <button type="submit" {{ $selectedJadwal ? '' : 'disabled' }}
+                                class="w-full py-3.5 bg-[#ffb600] text-white font-bold rounded-xl shadow-lg shadow-[#ffb600]/30 hover:shadow-[#ffb600]/50 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
                             Booking Sekarang
                         </button>
                     </form>
