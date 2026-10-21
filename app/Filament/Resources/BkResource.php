@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BkResource extends Resource
 {
@@ -27,15 +28,47 @@ class BkResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('id_konselor')->required()->label('ID Konselor'),
-            Forms\Components\TextInput::make('nama')->required()->label('Nama'),
-            Forms\Components\TextInput::make('nip')->label('NIP'),
-            Forms\Components\TextInput::make('spesialisasi')->required()->label('Spesialisasi'),
-            Forms\Components\Textarea::make('bio')->label('Biografi'),
-            Forms\Components\FileUpload::make('foto')->image()->label('Foto'),
-            Forms\Components\TextInput::make('nomor_hp')->label('Nomor HP'),
-            Forms\Components\TextInput::make('email')->email()->label('Email'),
-            Forms\Components\Toggle::make('status_aktif')->label('Status Aktif')->default(true),
+            Forms\Components\Section::make('Data Konselor')
+                ->description('Informasi profil konselor yang tampil di halaman publik.')
+                ->schema([
+                    Forms\Components\TextInput::make('id_konselor')->required()->label('ID Konselor'),
+                    Forms\Components\TextInput::make('nama')->required()->label('Nama'),
+                    Forms\Components\TextInput::make('nip')->label('NIP'),
+                    Forms\Components\TextInput::make('spesialisasi')->required()->label('Spesialisasi'),
+                    Forms\Components\Textarea::make('bio')->label('Biografi')->rows(4),
+                    Forms\Components\FileUpload::make('foto')->image()->label('Foto'),
+                    Forms\Components\TextInput::make('nomor_hp')->label('Nomor HP'),
+                    Forms\Components\TextInput::make('email')
+                        ->email()
+                        ->label('Email')
+                        ->required(fn (Forms\Get $get): bool => filled($get('password_akun')) && blank($get('user_id')))
+                        ->helperText('Email ini dipakai sebagai akun login jika password diisi.'),
+                    Forms\Components\Toggle::make('status_aktif')->label('Status Aktif')->default(true),
+                ])->columns(2),
+
+            Forms\Components\Section::make('Akun Login Konselor')
+                ->description('Akun ini dipakai konselor untuk masuk ke dashboard konselor.')
+                ->schema([
+                    Forms\Components\Select::make('user_id')
+                        ->label('Akun Login Terhubung')
+                        ->relationship(
+                            'user',
+                            'email',
+                            modifyQueryUsing: fn (Builder $query) => $query->where('role', 'konselor')
+                        )
+                        ->searchable()
+                        ->preload()
+                        ->placeholder('Belum terhubung')
+                        ->visible(fn (string $operation): bool => $operation === 'edit')
+                        ->helperText('Pilih akun yang sudah ada, atau biarkan kosong untuk membuat akun baru dari email konselor.'),
+                    Forms\Components\TextInput::make('password_akun')
+                        ->label('Password Akun Login')
+                        ->password()
+                        ->revealable()
+                        ->dehydrated(false)
+                        ->maxLength(255)
+                        ->helperText('Isi untuk membuat akun baru atau mereset password. Kosongkan jika tidak diubah.'),
+                ])->columns(1),
         ]);
     }
 
@@ -45,6 +78,7 @@ class BkResource extends Resource
             Tables\Columns\TextColumn::make('id_konselor')->label('ID Konselor')->searchable(),
             Tables\Columns\TextColumn::make('nama')->label('Nama')->searchable(),
             Tables\Columns\TextColumn::make('spesialisasi')->label('Spesialisasi'),
+            Tables\Columns\TextColumn::make('user.email')->label('Akun Login')->placeholder('Belum terhubung'),
             Tables\Columns\IconColumn::make('status_aktif')->boolean()->label('Aktif'),
             Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat'),
         ]);
