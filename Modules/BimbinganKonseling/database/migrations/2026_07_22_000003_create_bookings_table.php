@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->time('jam_sesi');
             $table->text('deskripsi_masalah')->nullable();
-            $table->enum('status', ['menunggu', 'disetujui', 'ditolak', 'selesai', 'dibatalkan'])->default('menunggu');
+            $table->string('status')->default('menunggu');
             $table->string('link_meeting')->nullable();
             $table->text('catatan_konselor')->nullable();
             $table->timestamp('waktu_booking')->useCurrent();

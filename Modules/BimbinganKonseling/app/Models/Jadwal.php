@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 class Jadwal extends Model
 {
     protected $table = 'jadwals';
-    protected $fillable = ['konselor_id', 'hari', 'jam_mulai', 'jam_selesai', 'kuota', 'status_aktif'];
+    protected $fillable = ['konselor_id', 'hari', 'jam_mulai', 'jam_selesai', 'kuota', 'status_aktif', 'mode', 'lokasi', 'platform'];
 
     public function konselor() { return $this->belongsTo(Konselor::class); }
 }

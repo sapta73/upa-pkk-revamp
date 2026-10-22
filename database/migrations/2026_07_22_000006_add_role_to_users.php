@@ -8,7 +8,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['mahasiswa', 'konselor', 'admin'])->default('mahasiswa')->after('email');
+            $table->string('role')->default('mahasiswa')->after('email');
             $table->string('nim')->nullable()->unique()->after('role');
             $table->string('prodi')->nullable()->after('nim');
             $table->string('nomor_hp')->nullable()->after('prodi');

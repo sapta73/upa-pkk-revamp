@@ -38,6 +38,9 @@
                     <span>Lihat Daftar Usaha</span>
                     <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
+                <a href="{{ route('wirausaha.program.create') }}" class="inline-flex items-center gap-2 px-7 py-3.5 bg-white/10 border border-white/20 text-white font-bold rounded-full hover:bg-white/20 transition-all duration-300">
+                    Daftar Program
+                </a>
             </div>
         </div>
     </div>
@@ -125,11 +128,16 @@
 <section class="bg-gradient-to-r from-yellow-500 to-yellow-600 py-16" data-reveal="up">
     <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Punya Usaha Inovatif?</h2>
-        <p class="text-yellow-100 mb-6 max-w-lg mx-auto">Ikuti program PMW atau P2MW dan dapatkan pendanaan untuk mengembangkan usahamu!</p>
-        <a href="{{ route('wirausaha.index') }}" class="inline-flex items-center gap-2 px-7 py-3 bg-white text-yellow-700 font-bold rounded-full hover:bg-yellow-50 transition-all duration-300 shadow-lg">
-            Lihat Daftar Usaha
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-        </a>
+        <p class="text-yellow-100 mb-6 max-w-lg mx-auto">Ikuti program PMW, P2MW, atau KLK dan dapatkan pendanaan untuk mengembangkan usahamu!</p>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="{{ route('wirausaha.program.create') }}" class="inline-flex items-center gap-2 px-7 py-3 bg-white text-yellow-700 font-bold rounded-full hover:bg-yellow-50 transition-all duration-300 shadow-lg">
+                Daftar Program
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="{{ route('wirausaha.index') }}" class="inline-flex items-center gap-2 px-7 py-3 bg-yellow-700/30 border border-white/30 text-white font-bold rounded-full hover:bg-yellow-700/50 transition-all duration-300">
+                Lihat Daftar Usaha
+            </a>
+        </div>
     </div>
 </section>
 @endsection

@@ -54,6 +54,27 @@ class JadwalResource extends Resource
                         ])
                         ->native(false)
                         ->required(),
+                    Forms\Components\Select::make('mode')
+                        ->label('Mode')
+                        ->options([
+                            'online' => 'Online',
+                            'offline' => 'Offline',
+                            'hybrid' => 'Online dan Offline',
+                        ])
+                        ->default('offline')
+                        ->required()
+                        ->native(false),
+                    Forms\Components\TextInput::make('lokasi')
+                        ->label('Lokasi Offline')
+                        ->visible(fn (Forms\Get $get): bool => in_array($get('mode'), ['offline', 'hybrid']))
+                        ->required(fn (Forms\Get $get): bool => in_array($get('mode'), ['offline', 'hybrid']))
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('platform')
+                        ->label('Platform Online')
+                        ->visible(fn (Forms\Get $get): bool => in_array($get('mode'), ['online', 'hybrid']))
+                        ->required(fn (Forms\Get $get): bool => in_array($get('mode'), ['online', 'hybrid']))
+                        ->maxLength(255)
+                        ->helperText('Contoh: Zoom, Google Meet, atau WhatsApp.'),
                     Forms\Components\TimePicker::make('jam_mulai')
                         ->label('Jam Mulai')
                         ->seconds(false)
@@ -85,6 +106,12 @@ class JadwalResource extends Resource
                 ->label('Hari')
                 ->formatStateUsing(fn (string $state): string => ucfirst($state))
                 ->sortable(),
+            Tables\Columns\BadgeColumn::make('mode')
+                ->label('Mode')
+                ->colors(['success' => 'online', 'primary' => 'offline', 'warning' => 'hybrid'])
+                ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+            Tables\Columns\TextColumn::make('lokasi')->label('Lokasi')->placeholder('-')->toggleable(),
+            Tables\Columns\TextColumn::make('platform')->label('Platform')->placeholder('-')->toggleable(),
             Tables\Columns\TextColumn::make('jam_mulai')->label('Jam Mulai')->time('H:i'),
             Tables\Columns\TextColumn::make('jam_selesai')->label('Jam Selesai')->time('H:i'),
             Tables\Columns\TextColumn::make('kuota')->label('Kuota')->numeric()->sortable(),
@@ -104,6 +131,13 @@ class JadwalResource extends Resource
                         'kamis' => 'Kamis',
                         'jumat' => 'Jumat',
                         'sabtu' => 'Sabtu',
+                    ]),
+                Tables\Filters\SelectFilter::make('mode')
+                    ->label('Mode')
+                    ->options([
+                        'online' => 'Online',
+                        'offline' => 'Offline',
+                        'hybrid' => 'Online dan Offline',
                     ]),
                 Tables\Filters\TernaryFilter::make('status_aktif')->label('Status Aktif'),
             ])

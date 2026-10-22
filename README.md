@@ -11,7 +11,7 @@
     <img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php" alt="PHP 8.3" />
     <img src="https://img.shields.io/badge/Filament-3.3-FBB040?style=flat-square&logo=filament" alt="Filament 3.3" />
     <img src="https://img.shields.io/badge/Livewire-3.8-FB70A9?style=flat-square&logo=livewire" alt="Livewire 3.8" />
-    <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind 4" />
+    <img src="https://img.shields.io/badge/Tailwind-3-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind 3" />
     <img src="https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square&logo=mysql" alt="MySQL 8" />
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
   </p>
@@ -29,15 +29,21 @@ Revamp total website **UPA PKK UBB** dari CodeIgniter 4 ke **Laravel 13** modern
 |---|---|
 | 🏠 **Beranda Modern** — Hero slider cinematic, scroll animations premium | ✅ Selesai |
 | 🧭 **Navigasi Cerdas** — Sticky navbar, scroll shrink, active section spy | ✅ Selesai |
-| 📋 **Bimbingan Konseling** — Booking online, pilih konselor, jadwal | ✅ Selesai |
+| 📋 **Bimbingan Konseling** — Booking online, pilih konselor, jadwal, mode online/offline | ✅ Selesai |
+| 🔁 **Reschedule Konseling** — Ajukan, setujui, atau tolak perubahan jadwal | ✅ Selesai |
 | 👨‍🏫 **Manajemen Konselor** — CRUD via Filament admin panel | ✅ Selesai |
 | 📅 **Manajemen Booking** — Approval, status, link meeting via Filament | ✅ Selesai |
+| 🎓 **Workshop & Seminar** — Pendaftaran, pembayaran manual, dan absensi | ✅ Selesai |
+| 🚀 **Program PMW, P2MW, KLK** — Pendaftaran tim dan review admin | ✅ Selesai |
+| 🧑‍💼 **Role Dosen & Tendik** — Akun dibuat admin, bisa ikut kegiatan | ✅ Selesai |
 | 🎨 **Animasi Scroll** — IntersectionObserver, stagger, parallax, ripple | ✅ Selesai |
-| 🔐 **Autentikasi Multi-Role** — Mahasiswa, Konselor, Admin (Breeze) | ✅ Selesai |
+| 🔐 **Autentikasi Multi-Role** — Mahasiswa, Dosen, Tendik, Konselor, Admin | ✅ Selesai |
 | 📱 **Responsive** — Mobile-first, hamburger menu, touch-friendly | ✅ Selesai |
-| 🎯 **Konselor Dashboard** — Dashboard khusus konselor | ⏳ WIP |
-| ⭐ **Rating & Feedback** — Rating setelah sesi konseling | ⏳ WIP |
-| 📧 **Notifikasi Email** — Konfirmasi booking otomatis | ⏳ WIP |
+| 🎯 **Konselor Dashboard** — Dashboard khusus konselor | ✅ Selesai |
+| ⭐ **Rating & Feedback** — Rating setelah sesi konseling | ✅ Selesai |
+| **Halaman Profil** — Data diri, password, dan hapus akun sesuai role | ✅ Selesai |
+| **Verifikasi Email** — Link verifikasi via SMTP | Menunggu SMTP |
+| **Notifikasi Email** — Konfirmasi booking otomatis | Belum dimulai |
 
 ---
 
@@ -51,7 +57,7 @@ Revamp total website **UPA PKK UBB** dari CodeIgniter 4 ke **Laravel 13** modern
 | **Filament** | ^3.3 | Admin panel (CRUD generator) |
 | **Livewire** | ^3.8 | Frontend interaktif (SPA-like) |
 | **Alpine.js** | 3.x | Frontend interaktivitas ringan |
-| **Tailwind CSS** | 4.x | Utility CSS framework |
+| **Tailwind CSS** | 3.x | Utility CSS framework |
 | **Vite** | 8.x | Build tool frontend |
 | **Laravel Breeze** | ^2.4 | Authentication scaffolding |
 

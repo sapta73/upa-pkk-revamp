@@ -12,12 +12,16 @@
             </a>
         </div>
 
+        @if(session('sukses'))
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium">{{ session('sukses') }}</div>
+        @endif
+
         {{-- Tab Navigation --}}
         <div class="flex gap-2 mb-8 p-1 bg-gray-100 rounded-xl w-fit">
             <button wire:click="$set('tab', 'aktif')" class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {{ $tab == 'aktif' ? 'bg-white text-[#a16207] shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
                 <span class="flex items-center gap-2">
                     Aktif
-                    @if($bookings->whereIn('status', ['menunggu','disetujui'])->count() > 0 && $tab == 'aktif')
+                    @if($bookings->whereIn('status', ['menunggu','disetujui','terlewat'])->count() > 0 && $tab == 'aktif')
                     <span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
                     @endif
                 </span>
@@ -33,7 +37,7 @@
              data-reveal="up">
             <div class="flex flex-col sm:flex-row">
                 {{-- Status Accent Bar --}}
-                <div class="w-full sm:w-2 shrink-0 h-1 sm:h-auto {{ $b->status == 'menunggu' ? 'bg-yellow-400' : ($b->status == 'disetujui' ? 'bg-green-400' : ($b->status == 'selesai' ? 'bg-blue-400' : 'bg-red-400')) }}"></div>
+                <div class="w-full sm:w-2 shrink-0 h-1 sm:h-auto {{ $b->status == 'menunggu' ? 'bg-yellow-400' : ($b->status == 'disetujui' ? 'bg-green-400' : ($b->status == 'selesai' ? 'bg-blue-400' : ($b->status == 'terlewat' ? 'bg-orange-400' : 'bg-red-400'))) }}"></div>
 
                 <div class="flex-1 p-5 lg:p-6">
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -45,13 +49,15 @@
                                     {{ $b->status == 'disetujui' ? 'bg-green-100 text-green-700' : '' }}
                                     {{ $b->status == 'selesai' ? 'bg-blue-100 text-blue-700' : '' }}
                                     {{ $b->status == 'ditolak' ? 'bg-red-100 text-red-700' : '' }}
-                                    {{ $b->status == 'dibatalkan' ? 'bg-gray-100 text-gray-600' : '' }}">
+                                    {{ $b->status == 'dibatalkan' ? 'bg-gray-100 text-gray-600' : '' }}
+                                    {{ $b->status == 'terlewat' ? 'bg-orange-100 text-orange-700' : '' }}">
                                     @switch($b->status)
                                         @case('menunggu') Menunggu @break
                                         @case('disetujui') Disetujui @break
                                         @case('selesai') Selesai @break
                                         @case('ditolak') Ditolak @break
                                         @case('dibatalkan') Dibatalkan @break
+                                        @case('terlewat') Terlewat @break
                                         @default {{ $b->status }}
                                     @endswitch
                                 </span>
@@ -69,6 +75,12 @@
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     {{ substr($b->jam_sesi, 0, 5) }} WIB
                                 </span>
+                                @if($b->mode)
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    {{ ucfirst($b->mode) }}@if($b->mode === 'offline' && $b->lokasi) · {{ $b->lokasi }}@endif
+                                </span>
+                                @endif
                             </div>
 
                             {{-- Status Timeline --}}
@@ -101,6 +113,9 @@
                                     @endforeach
                                 @endif
                             </div>
+                            @if($b->status === 'terlewat')
+                            <p class="mt-3 text-sm text-orange-700 font-medium">Sesi ini terlewat. Silakan ajukan reschedule.</p>
+                            @endif
                         </div>
 
                         {{-- Actions --}}
@@ -110,6 +125,19 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 Gabung Meeting
                             </a>
+                            @endif
+                            @if(in_array($b->status, ['disetujui', 'terlewat']))
+                                @php $permintaanMenunggu = $b->permintaanReschedule->where('status', 'menunggu')->first(); @endphp
+                                @if($permintaanMenunggu)
+                                <span class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-50 text-orange-700 border border-orange-100 font-medium text-xs rounded-xl">
+                                    Menunggu persetujuan reschedule
+                                </span>
+                                @else
+                                <button wire:click="bukaReschedule({{ $b->id }})" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-50 text-orange-700 font-medium text-sm rounded-xl hover:bg-orange-100 transition-all duration-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    Ajukan Reschedule
+                                </button>
+                                @endif
                             @endif
                             @if(in_array($b->status, ['menunggu']))
                             <button wire:click="batalkan({{ $b->id }})" onclick="return confirm('Yakin ingin membatalkan booking ini?')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 font-medium text-sm rounded-xl hover:bg-red-100 transition-all duration-300">
@@ -149,4 +177,54 @@
         </div>
         @endforelse
     </div>
+
+    @if($bookingReschedule)
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 bg-[#252525]/60 backdrop-blur-sm">
+        <div class="w-full max-w-lg rounded-3xl bg-white shadow-2xl border border-gray-100">
+            <form wire:submit="kirimReschedule" class="p-6 sm:p-8 space-y-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-[#252525]">Ajukan Reschedule</h2>
+                        <p class="text-sm text-gray-500 mt-1">{{ $bookingReschedule->konselor->nama }} · {{ \Carbon\Carbon::parse($bookingReschedule->tanggal)->translatedFormat('d F Y') }} · {{ substr($bookingReschedule->jam_sesi,0,5) }} WIB</p>
+                    </div>
+                    <button type="button" wire:click="tutupReschedule" class="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
+                </div>
+
+                <div>
+                    <label for="tanggalReschedule" class="block text-sm font-semibold text-[#303030] mb-1.5">Tanggal Baru</label>
+                    <input id="tanggalReschedule" type="date" wire:model="tanggalReschedule" wire:change="pilihTanggalReschedule($event.target.value)" min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="w-full rounded-xl border-gray-300 text-sm focus:border-[#ffb600] focus:ring-[#ffb600]">
+                    @error('tanggalReschedule') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="jadwalRescheduleId" class="block text-sm font-semibold text-[#303030] mb-1.5">Jadwal Baru</label>
+                    <select id="jadwalRescheduleId" wire:model="jadwalRescheduleId" wire:change="pilihJadwalReschedule($event.target.value)" {{ $tanggalReschedule ? '' : 'disabled' }} class="w-full rounded-xl border-gray-300 text-sm focus:border-[#ffb600] focus:ring-[#ffb600] disabled:opacity-60">
+                        @if(!$tanggalReschedule)
+                            <option value="">Pilih tanggal terlebih dahulu</option>
+                        @elseif(empty($jadwalRescheduleTersedia))
+                            <option value="">Tidak ada jadwal tersedia</option>
+                        @else
+                            <option value="">Pilih jadwal</option>
+                            @foreach($jadwalRescheduleTersedia as $jadwal)
+                                <option value="{{ $jadwal->id }}">{{ substr($jadwal->jam_mulai,0,5) }} - {{ substr($jadwal->jam_selesai,0,5) }} WIB (sisa kuota: {{ $jadwal->sisa_kuota }})</option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @error('jadwalRescheduleId') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="alasanReschedule" class="block text-sm font-semibold text-[#303030] mb-1.5">Alasan Reschedule</label>
+                    <textarea id="alasanReschedule" wire:model="alasanReschedule" rows="3" class="w-full rounded-xl border-gray-300 text-sm focus:border-[#ffb600] focus:ring-[#ffb600]" placeholder="Jelaskan alasan reschedule"></textarea>
+                    @error('alasanReschedule') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" wire:click="tutupReschedule" class="rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-bold text-[#303030] hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit" class="rounded-xl bg-[#ffb600] px-5 py-2.5 text-sm font-bold text-[#252525] hover:bg-[#e6a400] transition">Kirim Permintaan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
 </div>

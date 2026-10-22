@@ -37,6 +37,7 @@ class FilamentBkTest extends TestCase
 
         $this->assertNotNull($pengguna);
         $this->assertSame('konselor', $pengguna->role);
+        $this->assertNotNull($pengguna->email_verified_at);
         $this->assertDatabaseHas('konselors', [
             'id_konselor' => '990001',
             'user_id' => $pengguna->id,
@@ -59,6 +60,8 @@ class FilamentBkTest extends TestCase
             ->fillForm([
                 'konselor_id' => $konselor->id,
                 'hari' => 'senin',
+                'mode' => 'offline',
+                'lokasi' => 'Ruang BK UPA PKK',
                 'jam_mulai' => '09:00',
                 'jam_selesai' => '12:00',
                 'kuota' => 4,
@@ -86,13 +89,18 @@ class FilamentBkTest extends TestCase
             'status_aktif' => true,
         ]);
 
-        $akun = User::factory()->create(['role' => 'konselor']);
+        $akun = User::factory()->create([
+            'role' => 'konselor',
+            'email' => 'akun.lama@example.com',
+        ]);
 
         Livewire::test(EditKonselor::class, ['record' => $konselor->getRouteKey()])
             ->fillForm([
                 'id_konselor' => '990003',
-                'nama' => 'Konselor Taut',
+                'nama' => 'Konselor Taut Baru',
                 'spesialisasi' => 'Karir',
+                'email' => 'konselor.taut@example.com',
+                'nomor_hp' => '081234567890',
                 'user_id' => $akun->id,
                 'password_akun' => 'passwordbaru123',
                 'status_aktif' => true,
@@ -101,6 +109,10 @@ class FilamentBkTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertSame($akun->id, $konselor->fresh()->user_id);
+        $this->assertSame('Konselor Taut Baru', $akun->fresh()->name);
+        $this->assertSame('konselor.taut@example.com', $akun->fresh()->email);
+        $this->assertSame('081234567890', $akun->fresh()->nomor_hp);
+        $this->assertNull($akun->fresh()->email_verified_at);
         $this->assertTrue(Hash::check('passwordbaru123', $akun->fresh()->password));
     }
 }

@@ -25,20 +25,11 @@
             </div>
             <div>
                 <x-input-label for="prodi" :value="'Program Studi'" />
-                <select id="prodi" name="prodi" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-[#ffb600] focus:ring-[#ffb600]" required>
+                <select id="prodi" name="prodi" class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:border-[#ffb600] focus:ring-[#ffb600]" required>
                     <option value="">Pilih Prodi</option>
-                    <option value="Teknik Informatika">Teknik Informatika</option>
-                    <option value="Sistem Informasi">Sistem Informasi</option>
-                    <option value="Manajemen">Manajemen</option>
-                    <option value="Akuntansi">Akuntansi</option>
-                    <option value="Hukum">Hukum</option>
-                    <option value="Teknik Sipil">Teknik Sipil</option>
-                    <option value="Teknik Elektro">Teknik Elektro</option>
-                    <option value="Agribisnis">Agribisnis</option>
-                    <option value="Biologi">Biologi</option>
-                    <option value="Fisika">Fisika</option>
-                    <option value="Matematika">Matematika</option>
-                    <option value="Kimia">Kimia</option>
+                    @foreach (config('upa.prodi') as $prodi)
+                        <option value="{{ $prodi }}" @selected(old('prodi') === $prodi)>{{ $prodi }}</option>
+                    @endforeach
                 </select>
                 <x-input-error :messages="$errors->get('prodi')" class="mt-2" />
             </div>

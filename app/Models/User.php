@@ -2,27 +2,22 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\BimbinganKonseling\Models\Konselor;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nim', 'prodi', 'nomor_hp'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nim', 'nip', 'prodi', 'unit', 'nomor_hp'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -31,12 +26,23 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    /**
-     * Cek akses ke panel admin (Filament).
-     * Hanya admin yang boleh masuk ke /admin.
-     */
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function konselor()
+    {
+        return $this->hasOne(Konselor::class);
+    }
+
+    public function pendaftaranKegiatan()
+    {
+        return $this->hasMany(\App\Models\PendaftaranKegiatan::class);
+    }
+
+    public function pendaftaranProgram()
+    {
+        return $this->hasMany(\App\Models\PendaftaranProgram::class);
     }
 }

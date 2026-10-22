@@ -16,6 +16,10 @@ class BookingForm extends Component
     public $tanggal;
     public $jadwalTersedia = [];
     public $selectedJadwal;
+    public $mode;
+    public $modeTersedia = [];
+    public $lokasiTerpilih;
+    public $modeTersimpan;
     public $deskripsiMasalah;
     public $step = 1;
     public $bookingBerhasil = false;
@@ -25,6 +29,7 @@ class BookingForm extends Component
     protected $rules = [
         'tanggal' => 'required|date|after:today',
         'selectedJadwal' => 'required',
+        'mode' => 'required|in:online,offline',
         'deskripsiMasalah' => 'required|min:10',
     ];
 
@@ -69,6 +74,9 @@ class BookingForm extends Component
     {
         $this->jadwalTersedia = collect();
         $this->selectedJadwal = null;
+        $this->mode = null;
+        $this->modeTersedia = [];
+        $this->lokasiTerpilih = null;
 
         if (!$this->tanggal || !$this->konselor) {
             return;
@@ -111,6 +119,9 @@ class BookingForm extends Component
         $this->tanggal = null;
         $this->jadwalTersedia = collect();
         $this->selectedJadwal = null;
+        $this->mode = null;
+        $this->modeTersedia = [];
+        $this->lokasiTerpilih = null;
         $this->step = 2;
     }
 
@@ -121,6 +132,28 @@ class BookingForm extends Component
     public function pilihJadwal($nilai)
     {
         $this->selectedJadwal = $nilai ?: null;
+        $this->mode = null;
+        $this->modeTersedia = [];
+        $this->lokasiTerpilih = null;
+
+        if (!$this->selectedJadwal) {
+            return;
+        }
+
+        $jadwal = $this->jadwalTersedia->firstWhere('id', (int) $this->selectedJadwal);
+
+        if (!$jadwal) {
+            return;
+        }
+
+        $this->lokasiTerpilih = $jadwal->lokasi;
+
+        if ($jadwal->mode === 'hybrid') {
+            $this->modeTersedia = ['online', 'offline'];
+        } else {
+            $this->mode = $jadwal->mode;
+            $this->modeTersedia = [$jadwal->mode];
+        }
     }
 
     public function booking()
@@ -130,28 +163,35 @@ class BookingForm extends Component
         $jadwal = Jadwal::findOrFail($this->selectedJadwal);
         $user = auth()->user();
 
-        // ============ ABAC: validasi ulang di BACKEND ============
-        // Jangan pernah percaya begitu saja pada input UI.
-
-        // 1) Jadwal harus milik konselor yang sedang dibooking
         abort_unless($jadwal->konselor_id === (int) $this->konselorId, 422);
 
-        // 2) Hari pada jadwal WAJIB cocok dengan hari pada tanggal yang dipilih
         $hari = strtolower($this->namaHariTanggal());
+
         if ($jadwal->hari !== $hari) {
             $this->addError('selectedJadwal', 'Jadwal yang dipilih tidak tersedia di tanggal tersebut. Silakan pilih jadwal sesuai hari yang dipilih.');
 
             return;
         }
 
-        // 3) Kuota jadwal tidak boleh sudah penuh
+        $modeValid = match ($jadwal->mode) {
+            'online' => $this->mode === 'online',
+            'offline' => $this->mode === 'offline',
+            'hybrid' => in_array($this->mode, ['online', 'offline']),
+            default => false,
+        };
+
+        if (!$modeValid) {
+            $this->addError('mode', 'Mode sesi tidak tersedia untuk jadwal ini. Silakan pilih mode lain.');
+
+            return;
+        }
+
         if ($this->sisaKuota($jadwal) <= 0) {
             $this->addError('selectedJadwal', 'Kuota jadwal ini sudah penuh. Silakan pilih jadwal lain atau tanggal lain.');
 
             return;
         }
 
-        // 4) Cegah booking dobel: user yang sama di slot yang sama
         $dobel = Booking::where('user_id', $user->id)
             ->where('konselor_id', $this->konselorId)
             ->where('tanggal', $this->tanggal)
@@ -178,12 +218,15 @@ class BookingForm extends Component
             'email' => $user->email,
             'tanggal' => $this->tanggal,
             'jam_sesi' => $jamSesi,
+            'mode' => $this->mode,
+            'lokasi' => $this->mode === 'offline' ? $jadwal->lokasi : null,
             'deskripsi_masalah' => $this->deskripsiMasalah,
             'status' => 'menunggu',
         ]);
 
         $this->kodeBooking = $booking->kode_booking;
         $this->jamSesiTerpilih = $jamSesi;
+        $this->modeTersimpan = $this->mode;
         $this->bookingBerhasil = true;
     }
 

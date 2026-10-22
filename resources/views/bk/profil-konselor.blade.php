@@ -66,6 +66,11 @@
                                     <div>
                                         <div class="font-bold text-gray-900 capitalize text-base">{{ $jadwal->hari }}</div>
                                         <div class="text-sm text-gray-500">{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }} WIB</div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ $jadwal->mode === 'hybrid' ? 'Online/Offline' : ucfirst($jadwal->mode) }}
+                                            @if($jadwal->mode === 'offline' && $jadwal->lokasi) · {{ $jadwal->lokasi }} @endif
+                                            @if($jadwal->mode === 'online' && $jadwal->platform) · {{ $jadwal->platform }} @endif
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-right">

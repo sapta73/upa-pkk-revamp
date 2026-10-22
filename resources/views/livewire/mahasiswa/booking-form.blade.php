@@ -39,7 +39,7 @@
                 <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30">
                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 </div>
-                <h2 class="text-2xl lg:text-3xl font-black text-gray-900 mb-2">Booking Berhasil! 🎉</h2>
+                <h2 class="text-2xl lg:text-3xl font-black text-gray-900 mb-2">Booking Berhasil!</h2>
                 <p class="text-gray-500 mb-2">Sesi konselingmu telah terdaftar.</p>
 
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 my-6 text-left">
@@ -67,6 +67,12 @@
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-500">Jam Sesi</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $jamSesiTerpilih }} WIB</span>
+                    </div>
+                    @endif
+                    @if($modeTersimpan)
+                    <div class="flex items-center justify-between mt-3">
+                        <span class="text-sm text-gray-500">Mode</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ ucfirst($modeTersimpan) }}@if($modeTersimpan === 'offline' && $lokasiTerpilih) di {{ $lokasiTerpilih }}@endif</span>
                     </div>
                     @endif
                 </div>
@@ -149,9 +155,9 @@
                                 <p class="text-sm text-yellow-800">
                                     <span class="font-bold">Hari {{ $this->namaHariTanggal() }}</span>
                                     @if($jadwalTersedia->isNotEmpty())
-                                        — pilih slot waktu yang tersedia di bawah.
+                                        , pilih slot waktu yang tersedia di bawah.
                                     @else
-                                        — <span class="font-semibold">tidak ada jadwal tersedia di hari ini.</span>
+                                        , <span class="font-semibold">tidak ada jadwal tersedia di hari ini.</span>
                                     @endif
                                 </p>
                             </div>
@@ -171,14 +177,51 @@
                                 @elseif($jadwalTersedia->isEmpty())
                                     <option value="">Tidak ada jadwal tersedia di hari {{ $this->namaHariTanggal() }}</option>
                                 @else
-                                    <option value="">— Pilih jadwal —</option>
+                                    <option value="">Pilih jadwal</option>
                                     @foreach($jadwalTersedia as $j)
-                                    <option value="{{ $j->id }}">{{ substr($j->jam_mulai,0,5) }} – {{ substr($j->jam_selesai,0,5) }} WIB (Sisa kuota: {{ $j->sisa_kuota }})</option>
+                                    <option value="{{ $j->id }}">{{ substr($j->jam_mulai,0,5) }} - {{ substr($j->jam_selesai,0,5) }} WIB ({{ $j->mode === 'hybrid' ? 'Online/Offline' : ucfirst($j->mode) }}, sisa kuota: {{ $j->sisa_kuota }})</option>
                                     @endforeach
                                 @endif
                             </select>
                             @error('selectedJadwal') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
+
+                        @php
+                            $jadwalTerpilih = $selectedJadwal ? $jadwalTersedia->firstWhere('id', (int) $selectedJadwal) : null;
+                        @endphp
+
+                        @if($jadwalTerpilih)
+                        <div>
+                            @if(count($modeTersedia) > 1)
+                            <label for="mode" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Mode Sesi
+                            </label>
+                            <select id="mode" wire:model="mode" wire:change="$set('mode', $event.target.value)"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                                <option value="">Pilih mode sesi</option>
+                                <option value="online">Online</option>
+                                <option value="offline">Offline</option>
+                            </select>
+                            @error('mode') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                            @else
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700">
+                                Mode sesi: <span class="font-semibold">{{ ucfirst($mode) }}</span>
+                                @if($mode === 'offline' && $lokasiTerpilih)
+                                    di {{ $lokasiTerpilih }}
+                                @elseif($mode === 'online' && $jadwalTerpilih->platform)
+                                    via {{ $jadwalTerpilih->platform }}
+                                @endif
+                            </div>
+                            @endif
+
+                            @if($mode === 'offline' && $lokasiTerpilih)
+                            <p class="mt-2 text-sm text-gray-600">Lokasi: <span class="font-semibold">{{ $lokasiTerpilih }}</span></p>
+                            @elseif($mode === 'online' && $jadwalTerpilih->platform)
+                            <p class="mt-2 text-sm text-gray-600">Platform: <span class="font-semibold">{{ $jadwalTerpilih->platform }}</span>. Link meeting diberikan setelah booking disetujui.</p>
+                            @endif
+                        </div>
+                        @endif
 
                         {{-- STEP C: Deskripsi Masalah --}}
                         <div>

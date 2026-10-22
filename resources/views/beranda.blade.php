@@ -240,9 +240,9 @@ function heroSlider() {
                 overlayDir: 'bg-gradient-to-r from-black/40 via-black/20 to-transparent',
                 slideFrom: 'left',
                 buttons: [
-                    { text: 'Karir', url: '/karir', variant: 'primary' },
+                    { text: 'Karir', url: '{{ route('karier.index') }}', variant: 'primary' },
                     { text: 'Bimbingan Konseling', url: '/bimbingan-konseling', variant: 'primary' },
-                    { text: 'Kewirausahaan', url: '/kewirausahaan', variant: 'secondary' }
+                    { text: 'Kewirausahaan', url: '{{ route('wirausaha.landing') }}', variant: 'secondary' }
                 ]
             },
             {

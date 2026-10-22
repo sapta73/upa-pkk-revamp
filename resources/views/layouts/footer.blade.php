@@ -11,7 +11,7 @@
                     <li><a href="{{ url('/berita') }}" class="hover:text-[#ffb600] transition hover:translate-x-1 inline-block">Berita</a></li>
                     <li><a href="{{ url('/bimbingan-konseling') }}" class="hover:text-[#ffb600] transition hover:translate-x-1 inline-block">Bimbingan Konseling</a></li>
                     <li><a href="{{ url('/ppid') }}" class="hover:text-[#ffb600] transition hover:translate-x-1 inline-block">PPID</a></li>
-                    <li><a href="{{ route('lowongan.index') }}" class="hover:text-[#ffb600] transition hover:translate-x-1 inline-block">Karir</a></li>
+                    <li><a href="{{ route('karier.index') }}" class="hover:text-[#ffb600] transition hover:translate-x-1 inline-block">Karir</a></li>
                 </ul>
             </div>
             <div data-reveal="up" data-reveal-delay="300">

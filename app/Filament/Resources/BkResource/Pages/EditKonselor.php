@@ -19,6 +19,7 @@ class EditKonselor extends EditRecord
     protected function afterSave(): void
     {
         $this->tautkanAkunKonselor();
+        $this->sinkronkanDataKonselor();
     }
 
     protected function getHeaderActions(): array

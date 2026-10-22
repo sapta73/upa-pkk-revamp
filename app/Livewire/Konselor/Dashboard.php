@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Konselor;
 
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\BimbinganKonseling\Models\Booking;
 use Modules\BimbinganKonseling\Models\Jadwal;
 use Modules\BimbinganKonseling\Models\Konselor;
+use Modules\BimbinganKonseling\Models\PermintaanReschedule;
 
 #[Layout('layouts.livewire')]
 class Dashboard extends Component
@@ -18,6 +20,7 @@ class Dashboard extends Component
     public $tab = 'menunggu';
     public $catatan = [];
     public $linkMeeting = [];
+    public $catatanReschedule = [];
 
     protected $rules = [
         'catatan.*' => 'nullable|string',
@@ -27,32 +30,15 @@ class Dashboard extends Component
     public function mount()
     {
         $this->konselor = $this->cariKonselor();
+
         if (!$this->konselor) {
             abort(403, 'Akun Anda belum terhubung dengan data konselor. Hubungi admin.');
         }
     }
 
-    /**
-     * Mencari data konselor berdasarkan akun login.
-     */
     protected function cariKonselor()
     {
-        $user = auth()->user();
-
-        // Prioritas: cocokkan via user_id
-        $konselor = Konselor::where('user_id', $user->id)->first();
-
-        // Fallback: cocokkan via email
-        if (!$konselor && $user->email) {
-            $konselor = Konselor::where('email', $user->email)->first();
-        }
-
-        // Fallback terakhir: cocokkan via nama
-        if (!$konselor) {
-            $konselor = Konselor::where('nama', $user->name)->first();
-        }
-
-        return $konselor;
+        return Konselor::where('user_id', auth()->id())->first();
     }
 
     public function updatedTab()
@@ -60,14 +46,11 @@ class Dashboard extends Component
         $this->resetPage();
     }
 
-    /**
-     * Ubah status booking (Setuju / Tolak / Selesai).
-     */
     public function ubahStatus($id, $status)
     {
         $booking = $this->bookingMilik($id);
 
-        $statusValid = ['disetujui', 'ditolak', 'selesai', 'dibatalkan'];
+        $statusValid = ['disetujui', 'ditolak', 'selesai', 'dibatalkan', 'terlewat'];
         abort_unless(in_array($status, $statusValid), 422);
 
         $booking->update([
@@ -76,12 +59,76 @@ class Dashboard extends Component
             'link_meeting' => $this->linkMeeting[$id] ?? $booking->link_meeting,
         ]);
 
-        session()->flash('sukses', "Status booking {$booking->kode_booking} berhasil diubah menjadi " . $this->labelStatus($status) . ".");
+        session()->flash('sukses', "Status booking {$booking->kode_booking} berhasil diubah menjadi " . $this->labelStatus($status) . '.');
     }
 
-    /**
-     * Booking yang hanya milik konselor yang sedang login.
-     */
+    public function tandaiTerlewat($id)
+    {
+        $booking = $this->bookingMilik($id);
+        $booking->update(['status' => 'terlewat']);
+        session()->flash('sukses', "Booking {$booking->kode_booking} ditandai terlewat.");
+    }
+
+    public function setujuiReschedule($id)
+    {
+        $permintaan = PermintaanReschedule::with(['booking', 'jadwal'])
+            ->whereHas('booking', fn ($query) => $query->where('konselor_id', $this->konselor->id))
+            ->where('status', 'menunggu')
+            ->findOrFail($id);
+
+        $booking = $permintaan->booking;
+        $jadwal = $permintaan->jadwal;
+
+        if (!$jadwal) {
+            session()->flash('gagal', 'Jadwal baru tidak ditemukan.');
+
+            return;
+        }
+
+        $terisi = Booking::where('konselor_id', $this->konselor->id)
+            ->where('tanggal', $permintaan->tanggal_baru)
+            ->where('jam_sesi', substr($jadwal->jam_mulai, 0, 5))
+            ->whereIn('status', ['menunggu', 'disetujui'])
+            ->where('id', '!=', $booking->id)
+            ->count();
+
+        if ($jadwal->kuota > 0 && $terisi >= $jadwal->kuota) {
+            session()->flash('gagal', 'Kuota jadwal baru sudah penuh.');
+
+            return;
+        }
+
+        DB::transaction(function () use ($booking, $permintaan, $jadwal) {
+            $mode = $jadwal->mode === 'hybrid' ? ($booking->mode ?: 'online') : $jadwal->mode;
+
+            $booking->update([
+                'tanggal' => $permintaan->tanggal_baru->toDateString(),
+                'jam_sesi' => substr($jadwal->jam_mulai, 0, 5),
+                'mode' => $mode,
+                'lokasi' => $mode === 'offline' ? $jadwal->lokasi : null,
+                'status' => 'disetujui',
+            ]);
+
+            $permintaan->update(['status' => 'disetujui']);
+        });
+
+        session()->flash('sukses', 'Permintaan reschedule disetujui.');
+    }
+
+    public function tolakReschedule($id)
+    {
+        $permintaan = PermintaanReschedule::whereHas('booking', fn ($query) => $query->where('konselor_id', $this->konselor->id))
+            ->where('status', 'menunggu')
+            ->findOrFail($id);
+
+        $permintaan->update([
+            'status' => 'ditolak',
+            'catatan_konselor' => $this->catatanReschedule[$id] ?? null,
+        ]);
+
+        session()->flash('sukses', 'Permintaan reschedule ditolak.');
+    }
+
     protected function bookingMilik($id)
     {
         return Booking::where('id', $id)
@@ -96,6 +143,7 @@ class Dashboard extends Component
             'ditolak' => 'Ditolak',
             'selesai' => 'Selesai',
             'dibatalkan' => 'Dibatalkan',
+            'terlewat' => 'Terlewat',
             default => 'Menunggu',
         };
     }
@@ -106,20 +154,33 @@ class Dashboard extends Component
             ->where('status_aktif', true)
             ->get();
 
-        $bookings = Booking::with('konselor')
-            ->where('konselor_id', $this->konselor->id)
-            ->when($this->tab === 'menunggu', fn($q) => $q->where('status', 'menunggu'))
-            ->when($this->tab === 'aktif', fn($q) => $q->whereIn('status', ['disetujui']))
-            ->when($this->tab === 'selesai', fn($q) => $q->whereIn('status', ['selesai', 'ditolak', 'dibatalkan']))
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $permintaanReschedule = collect();
+
+        if ($this->tab === 'reschedule') {
+            $bookings = Booking::whereRaw('1 = 0')->paginate(10);
+            $permintaanReschedule = PermintaanReschedule::with(['booking', 'user', 'jadwal'])
+                ->whereHas('booking', fn ($query) => $query->where('konselor_id', $this->konselor->id))
+                ->where('status', 'menunggu')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        } else {
+            $bookings = Booking::with('konselor')
+                ->where('konselor_id', $this->konselor->id)
+                ->when($this->tab === 'menunggu', fn ($query) => $query->where('status', 'menunggu'))
+                ->when($this->tab === 'aktif', fn ($query) => $query->whereIn('status', ['disetujui', 'terlewat']))
+                ->when($this->tab === 'selesai', fn ($query) => $query->whereIn('status', ['selesai', 'ditolak', 'dibatalkan']))
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        }
 
         $statistik = [
             'menunggu' => Booking::where('konselor_id', $this->konselor->id)->where('status', 'menunggu')->count(),
             'disetujui' => Booking::where('konselor_id', $this->konselor->id)->where('status', 'disetujui')->count(),
             'selesai' => Booking::where('konselor_id', $this->konselor->id)->where('status', 'selesai')->count(),
+            'terlewat' => Booking::where('konselor_id', $this->konselor->id)->where('status', 'terlewat')->count(),
+            'reschedule' => PermintaanReschedule::whereHas('booking', fn ($query) => $query->where('konselor_id', $this->konselor->id))->where('status', 'menunggu')->count(),
         ];
 
-        return view('livewire.konselor.dashboard', compact('jadwals', 'bookings', 'statistik'));
+        return view('livewire.konselor.dashboard', compact('jadwals', 'bookings', 'statistik', 'permintaanReschedule'));
     }
 }

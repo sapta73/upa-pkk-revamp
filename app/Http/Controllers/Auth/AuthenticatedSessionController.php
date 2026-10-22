@@ -28,13 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $role = auth()->user()->role;
-        $redirect = match ($role) {
-            'admin' => '/admin',
-            'konselor' => '/konselor/dashboard',
-            default => '/mahasiswa/my-booking',
-        };
-        return redirect()->intended($redirect);
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**

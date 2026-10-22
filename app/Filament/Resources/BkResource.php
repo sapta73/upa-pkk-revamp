@@ -41,8 +41,8 @@ class BkResource extends Resource
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->label('Email')
-                        ->required(fn (Forms\Get $get): bool => filled($get('password_akun')) && blank($get('user_id')))
-                        ->helperText('Email ini dipakai sebagai akun login jika password diisi.'),
+                        ->required(fn (Forms\Get $get): bool => filled($get('password_akun')) || filled($get('user_id')))
+                        ->helperText('Email ini dipakai sebagai akun login konselor.'),
                     Forms\Components\Toggle::make('status_aktif')->label('Status Aktif')->default(true),
                 ])->columns(2),
 

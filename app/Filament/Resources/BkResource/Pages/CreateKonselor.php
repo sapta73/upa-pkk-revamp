@@ -18,6 +18,7 @@ class CreateKonselor extends CreateRecord
     protected function afterCreate(): void
     {
         $this->tautkanAkunKonselor();
+        $this->sinkronkanDataKonselor();
     }
 
     protected function getRedirectUrl(): string

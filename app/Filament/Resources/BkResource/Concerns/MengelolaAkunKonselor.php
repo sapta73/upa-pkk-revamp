@@ -53,11 +53,18 @@ trait MengelolaAkunKonselor
         if (filled($userId)) {
             $pengguna = User::find($userId);
 
-            if ($pengguna && filled($password)) {
-                $pengguna->update(['password' => $password]);
-            }
+            if ($pengguna) {
+                if (filled($password)) {
+                    $pengguna->update(['password' => $password]);
+                }
 
-            $this->record->update(['user_id' => $userId]);
+                if (!$pengguna->hasVerifiedEmail()) {
+                    $pengguna->email_verified_at = now();
+                    $pengguna->save();
+                }
+
+                $this->record->update(['user_id' => $pengguna->id]);
+            }
 
             return;
         }
@@ -70,6 +77,11 @@ trait MengelolaAkunKonselor
 
         if ($pengguna) {
             $pengguna->update(['password' => $password]);
+
+            if (!$pengguna->hasVerifiedEmail()) {
+                $pengguna->email_verified_at = now();
+                $pengguna->save();
+            }
         } else {
             $pengguna = User::create([
                 'name' => $this->data['nama'],
@@ -77,8 +89,34 @@ trait MengelolaAkunKonselor
                 'password' => $password,
                 'role' => 'konselor',
             ]);
+            $pengguna->email_verified_at = now();
+            $pengguna->save();
         }
 
         $this->record->update(['user_id' => $pengguna->id]);
+    }
+
+    protected function sinkronkanDataKonselor(): void
+    {
+        if (blank($this->record->user_id)) {
+            return;
+        }
+
+        $pengguna = User::find($this->record->user_id);
+
+        if (!$pengguna) {
+            return;
+        }
+
+        $emailLama = $pengguna->email;
+        $pengguna->name = $this->record->nama;
+        $pengguna->email = $this->record->email;
+        $pengguna->nomor_hp = $this->record->nomor_hp;
+
+        if ($pengguna->email !== $emailLama) {
+            $pengguna->email_verified_at = null;
+        }
+
+        $pengguna->save();
     }
 }

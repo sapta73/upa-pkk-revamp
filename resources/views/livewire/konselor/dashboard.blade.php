@@ -28,7 +28,7 @@
         @endif
 
         {{-- Statistik --}}
-        <div class="grid grid-cols-3 gap-4 mb-10" data-stagger>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10" data-stagger>
             <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
                 <div class="text-3xl font-black text-yellow-600">{{ $statistik['menunggu'] }}</div>
                 <div class="text-xs text-gray-500 font-medium mt-1">Menunggu</div>
@@ -36,6 +36,10 @@
             <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
                 <div class="text-3xl font-black text-green-600">{{ $statistik['disetujui'] }}</div>
                 <div class="text-xs text-gray-500 font-medium mt-1">Disetujui</div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
+                <div class="text-3xl font-black text-orange-600">{{ $statistik['terlewat'] }}</div>
+                <div class="text-xs text-gray-500 font-medium mt-1">Terlewat</div>
             </div>
             <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
                 <div class="text-3xl font-black text-blue-600">{{ $statistik['selesai'] }}</div>
@@ -77,13 +81,57 @@
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="p-5 lg:p-6 border-b border-gray-100">
                         <h2 class="font-bold text-gray-900 mb-4">Daftar Booking Mahasiswa</h2>
-                        <div class="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+                        <div class="flex flex-wrap gap-2 p-1 bg-gray-100 rounded-xl w-fit">
                             <button wire:click="$set('tab', 'menunggu')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 {{ $tab == 'menunggu' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">Menunggu</button>
-                            <button wire:click="$set('tab', 'aktif')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 {{ $tab == 'aktif' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">Disetujui</button>
+                            <button wire:click="$set('tab', 'aktif')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 {{ $tab == 'aktif' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">Aktif</button>
                             <button wire:click="$set('tab', 'selesai')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 {{ $tab == 'selesai' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">Selesai</button>
+                            <button wire:click="$set('tab', 'reschedule')" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 {{ $tab == 'reschedule' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                                Reschedule
+                                @if($statistik['reschedule'] > 0)
+                                    <span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] font-bold text-white">{{ $statistik['reschedule'] }}</span>
+                                @endif
+                            </button>
                         </div>
                     </div>
 
+                    @if($tab === 'reschedule')
+                    <div class="divide-y divide-gray-100">
+                        @forelse($permintaanReschedule as $permintaan)
+                        <div class="p-5 lg:p-6">
+                            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 text-orange-700">Reschedule</span>
+                                        <span class="text-xs text-gray-400 font-mono">{{ $permintaan->booking->kode_booking }}</span>
+                                    </div>
+                                    <h3 class="font-bold text-gray-900">{{ $permintaan->user?->name ?? $permintaan->booking->nama_mahasiswa }}</h3>
+                                    <p class="text-sm text-gray-500 mt-1">Dari {{ \Carbon\Carbon::parse($permintaan->booking->tanggal)->isoFormat('D MMMM Y') }} {{ substr($permintaan->booking->jam_sesi,0,5) }} WIB</p>
+                                    <p class="text-sm text-gray-500">Ke {{ $permintaan->tanggal_baru->translatedFormat('d F Y') }} {{ substr($permintaan->jam_baru,0,5) }} WIB</p>
+                                    <p class="text-sm text-gray-600 mt-3 bg-gray-50 rounded-lg p-3 leading-relaxed"><span class="font-semibold text-gray-700">Alasan:</span> {{ $permintaan->alasan }}</p>
+                                </div>
+                                <div class="lg:w-64 shrink-0 space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Catatan Konselor</label>
+                                        <textarea wire:model="catatanReschedule.{{ $permintaan->id }}" rows="2" placeholder="Catatan untuk mahasiswa..." class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"></textarea>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button wire:click="setujuiReschedule({{ $permintaan->id }})" class="flex-1 px-3 py-2 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition">Setujui</button>
+                                        <button wire:click="tolakReschedule({{ $permintaan->id }})" class="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition">Tolak</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="text-center py-16">
+                            <p class="text-gray-500 font-medium">Tidak ada permintaan reschedule</p>
+                        </div>
+                        @endforelse
+                    </div>
+
+                    <div class="p-4 border-t border-gray-100">
+                        {{ $permintaanReschedule->links() }}
+                    </div>
+                    @else
                     <div class="divide-y divide-gray-100">
                         @forelse($bookings as $b)
                         <div class="p-5 lg:p-6">
@@ -95,7 +143,8 @@
                                             {{ $b->status == 'disetujui' ? 'bg-green-100 text-green-700' : '' }}
                                             {{ $b->status == 'selesai' ? 'bg-blue-100 text-blue-700' : '' }}
                                             {{ $b->status == 'ditolak' ? 'bg-red-100 text-red-700' : '' }}
-                                            {{ $b->status == 'dibatalkan' ? 'bg-gray-100 text-gray-600' : '' }}">
+                                            {{ $b->status == 'dibatalkan' ? 'bg-gray-100 text-gray-600' : '' }}
+                                            {{ $b->status == 'terlewat' ? 'bg-orange-100 text-orange-700' : '' }}">
                                             {{ ucfirst($b->status) }}
                                         </span>
                                         <span class="text-xs text-gray-400 font-mono">{{ $b->kode_booking }}</span>
@@ -104,6 +153,9 @@
                                     <p class="text-sm text-gray-500 mt-0.5">{{ $b->prodi }}</p>
                                     <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
                                         <span>{{ \Carbon\Carbon::parse($b->tanggal)->isoFormat('D MMMM Y') }} • {{ substr($b->jam_sesi,0,5) }} WIB</span>
+                                        @if($b->mode)
+                                        <span>{{ ucfirst($b->mode) }}@if($b->mode === 'offline' && $b->lokasi) • {{ $b->lokasi }}@endif</span>
+                                        @endif
                                     </div>
                                     @if($b->deskripsi_masalah)
                                     <p class="text-sm text-gray-600 mt-3 bg-gray-50 rounded-lg p-3 leading-relaxed">
@@ -115,10 +167,17 @@
                                 {{-- Aksi Konselor --}}
                                 <div class="lg:w-64 shrink-0 space-y-3">
                                     @if(in_array($b->status, ['disetujui', 'menunggu']))
+                                    @if($b->mode !== 'offline')
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-600 mb-1">Link Meeting</label>
                                         <input type="url" wire:model="linkMeeting.{{ $b->id }}" placeholder="https://zoom.us/..." class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                     </div>
+                                    @else
+                                    <div class="p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                                        <p class="text-xs font-semibold text-gray-600 mb-1">Lokasi Offline</p>
+                                        <p class="text-xs text-gray-600">{{ $b->lokasi ?? 'Belum diisi' }}</p>
+                                    </div>
+                                    @endif
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-600 mb-1">Catatan Konselor</label>
                                         <textarea wire:model="catatan.{{ $b->id }}" rows="2" placeholder="Catatan hasil konseling..." class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"></textarea>
@@ -129,7 +188,13 @@
                                         <button wire:click="ubahStatus({{ $b->id }}, 'ditolak')" class="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition">Tolak</button>
                                         @elseif($b->status == 'disetujui')
                                         <button wire:click="ubahStatus({{ $b->id }}, 'selesai')" class="flex-1 px-3 py-2 bg-blue-500 text-white text-xs font-bold rounded-lg hover:bg-blue-600 transition">Selesaikan</button>
+                                        <button wire:click="tandaiTerlewat({{ $b->id }})" class="flex-1 px-3 py-2 bg-orange-500 text-white text-xs font-bold rounded-lg hover:bg-orange-600 transition">Terlewat</button>
                                         @endif
+                                    </div>
+                                    @elseif($b->status == 'terlewat')
+                                    <div class="p-3 bg-orange-50 border border-orange-100 rounded-lg">
+                                        <p class="text-xs font-bold text-orange-700 mb-1">Sesi Terlewat</p>
+                                        <p class="text-xs text-orange-600 leading-relaxed">Menunggu pengajuan reschedule dari mahasiswa.</p>
                                     </div>
                                     @elseif($b->status == 'selesai')
                                     <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg">
@@ -153,6 +218,7 @@
                     <div class="p-4 border-t border-gray-100">
                         {{ $bookings->links() }}
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

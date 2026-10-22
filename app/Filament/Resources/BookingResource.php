@@ -35,10 +35,19 @@ class BookingResource extends Resource
             Forms\Components\TextInput::make('email')->email()->required()->label('Email'),
             Forms\Components\DatePicker::make('tanggal')->required()->label('Tanggal'),
             Forms\Components\TimePicker::make('jam_sesi')->required()->label('Jam Sesi'),
+            Forms\Components\Select::make('mode')
+                ->label('Mode')
+                ->options([
+                    'online' => 'Online',
+                    'offline' => 'Offline',
+                ])
+                ->native(false),
+            Forms\Components\TextInput::make('lokasi')->label('Lokasi Offline'),
             Forms\Components\Textarea::make('deskripsi_masalah')->label('Deskripsi Masalah'),
             Forms\Components\Select::make('status')->options([
                 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui',
-                'ditolak' => 'Ditolak', 'selesai' => 'Selesai', 'dibatalkan' => 'Dibatalkan'
+                'ditolak' => 'Ditolak', 'selesai' => 'Selesai',
+                'dibatalkan' => 'Dibatalkan', 'terlewat' => 'Terlewat'
             ])->required()->label('Status'),
             Forms\Components\TextInput::make('link_meeting')->label('Link Meeting'),
             Forms\Components\Textarea::make('catatan_konselor')->label('Catatan Konselor'),
@@ -53,9 +62,11 @@ class BookingResource extends Resource
             Tables\Columns\TextColumn::make('konselor.nama')->label('Konselor'),
             Tables\Columns\TextColumn::make('tanggal')->date()->label('Tanggal'),
             Tables\Columns\TextColumn::make('jam_sesi')->time()->label('Jam'),
+            Tables\Columns\TextColumn::make('mode')->label('Mode')->placeholder('-')->toggleable(),
             Tables\Columns\BadgeColumn::make('status')->colors([
                 'warning' => 'menunggu', 'success' => 'disetujui',
-                'danger' => 'ditolak', 'primary' => 'selesai', 'secondary' => 'dibatalkan'
+                'danger' => 'ditolak', 'primary' => 'selesai',
+                'secondary' => 'dibatalkan', 'info' => 'terlewat'
             ])->label('Status'),
         ]);
     }
